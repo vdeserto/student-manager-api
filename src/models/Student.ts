@@ -13,10 +13,10 @@ export default class Student {
     
     @Column()
     curso: string;
-    // {type: 'text', default: "datetime('CURRENT_TIMESTAMP', 'localtime')"}
-    @Column()
+    
+    @Column({type: 'datetime', default: () => 'datetime("now", "localtime")'})
     registrado_em: string;
 
-    @Column()
+    @Column({default: "true"})
     situacao: boolean;
 }

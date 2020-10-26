@@ -58,8 +58,8 @@ export default {
         const student = studentsRepository.create(data)
         
         await studentsRepository.save(student)
-        return res.json(student)
+        return res.status(201).json(studentView.render(student))
         
-        return res.status(201).json(student) // RETURN 201 -> CREATED (SEMANTICO)
+        // return res.status(201).json(student) // RETURN 201 -> CREATED (SEMANTICO)
     }
 }
