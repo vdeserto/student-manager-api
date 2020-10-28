@@ -14,9 +14,9 @@ export default class Student {
     @Column()
     curso: string;
     
-    @Column({type: 'datetime', default: () => 'datetime("now", "localtime")'})
+    @Column({type: 'text' ,default: () => 'datetime("now")'})
     registrado_em: string;
 
-    @Column({default: "true"})
+    @Column({default: 'true'})
     situacao: boolean;
 }
