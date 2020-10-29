@@ -12,6 +12,6 @@ routes.post('/alunos', StudentController.createStudent)
 routes.get('/alunos/:id', StudentController.showStudentById)
     .post('/alunos/:id', (req, res) => res.status(405).json({Erro: 'método POST /alunos:id não permitido!'}))
     .put('/alunos/:id', StudentController.updateStudentById)
-    .delete('/alunos/:id', StudentController.deleteStudentById)
+    .delete('/alunos/:id', (req, res) => StudentController.deleteStudentById(req, res))
 
 export default routes

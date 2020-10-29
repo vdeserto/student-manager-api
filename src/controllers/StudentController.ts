@@ -1,20 +1,69 @@
 import { Request, Response } from 'express'
 import moment from 'moment'
-import { getRepository } from 'typeorm'
+import { Between, getRepository, LessThanOrEqual, Like, MoreThan, MoreThanOrEqual } from 'typeorm'
 
 
 import Student from '../models/Student'
 import studentView from '../views/student_view'
 
 export default {
+    /**
+     * Método GET em /alunos
+     * Listagem de todos os atributos de um estudante, definidos na model Student
+     * opcionalmente tomando como critério: limite[default=25], pagina[default=1] e nome
+     * Leitura da tabela students respeitando regras da model Student
+    **/
     async showAllStudents (req: Request, res: Response) {
+
+        // Desestruturação das query params
+        let {
+            limite,
+            pagina,
+            nome
+        } = req.query
+        
+        
+        // Valores padrões estabelecidos: limite=25, pagina=1
+        limite === undefined ? limite = '25' : limite
+        pagina === undefined ? pagina = '1' : pagina
+        nome === undefined ? nome = '' : nome
+        
+        /* Lógica do limite inferior: (limite * pagina) - (limite + 1) 
+        *  Exemplo: para limite=50 e pagina=2 temos: (50 * 2) - (50 - 1 ) = 100 - 49 = 51,
+        *           ou seja, iniciar projeção de estudantes a partir do 51º registro
+        */
+        let inicio = ( Number.parseInt( limite.toString() ) * Number.parseInt( pagina.toString() )  ) - Number.parseInt( limite.toString() ) + 1
+
+        /* Lógica do limite superior: limite * pagina
+        *  Exemplo: para limite=50 e pagina=2 temos: 50 * 2  = 100,
+        *           ou seja, encerrar a projeção de estudantes no 100º registro
+        */
+        let fim = Number.parseInt(limite.toString()) * Number.parseInt( pagina.toString() )
+        
         const studentRepository = getRepository(Student)
-        const students = await studentRepository.find()
+
+        /* Lógica da projeção dos estudantes usando TypeORM
+        *    SELECT *
+            FROM students
+            WHERE id BETWEEN inicio AND fim AND nome="%nome%"
+        */
+        const students = await studentRepository.find(
+            {where:
+                {id: Between(inicio, fim),
+                nome: Like(`%${nome}%`)
+                }
+            })
         
         return res.json(studentView.renderMany(students))
         
     },
 
+    /**
+     * Método POST em /alunos
+     * Criação de um estudante, recebendo nome, rga e curso
+     * Inserção na tabela students respeitando regras da model Student
+     * 
+    **/
     async createStudent(req: Request, res: Response) {
         const {
             nome,
@@ -99,15 +148,15 @@ export default {
         
         const studentRepository = getRepository(Student)
 
-        // const encontrado = studentRepository.findOne(Number.parseInt(id))
+        const deletedStudent = await this.showStudentById(req, res)
 
-        const deletado = await studentRepository.softDelete({id: Number.parseInt(id)}).catch((e) => res.status(404).json('e.errors' + e ))
+        await studentRepository.delete({id: Number.parseInt(id)}).catch((e) => res.status(404).json('e.errors' + e ))
         
         // const student = await studentRepository.restore(deletado)
 
         // if(!student) return res.status(404).json('Not Found student')
 
-        return res.status(200).json(deletado)
+        return deletedStudent
 
     }
 }
