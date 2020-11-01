@@ -1,27 +1,5 @@
 import {ErrorRequestHandler} from 'express'
 
-interface ValidationErrors {
-    [key: string]: string[]
-}
-
-
-const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
-    // if (error instanceof ValidationError) {
-    //     let errors: ValidationErrors  = {}
-
-    //     error.inner.forEach(err => {
-    //         errors[err.path] =  err.errors
-    //     })
-
-    //     return res.status(400).json({message: 'Validations fails', errors})
-    // }
-    
-    
-    
-    
-    // console.error(error)
-
-    return res.status(500).json({message: 'Internal Server Error'})
-}
+const errorHandler: ErrorRequestHandler = (error, req, res, next) => res.status(500).json({message: 'Internal Server Error'})
 
 export default errorHandler
